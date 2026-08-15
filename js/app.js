@@ -441,7 +441,10 @@ function commitPad(){
 function renderAddSheet(){
   if(!state.addOpen) return null;
   const nf = state.nf;
-  const setNf = (k,v) => { state.nf = Object.assign({}, state.nf, {[k]:v}); render(); };
+  // typing must not trigger a re-render (it would rebuild the input and drop focus);
+  // only mutate the model silently, and re-render for changes that need a visual update (the cover preview)
+  const setNfSilent = (k,v) => { state.nf = Object.assign({}, state.nf, {[k]:v}); };
+  const setNf = (k,v) => { setNfSilent(k,v); render(); };
   return h('div', {class:'overlay', onclick: e => { if(e.target === e.currentTarget) setState({addOpen:false}); }},
     h('div', {class:'sheet'},
       h('div', {class:'sheet-title'}, 'Add a book'),
@@ -456,9 +459,13 @@ function renderAddSheet(){
             : h('div', {class:'cover-placeholder'}, h('div', {class:'cam-icon'}), h('span', {}, 'Photograph', h('br'), 'the cover'))
         ),
         h('div', {class:'add-fields'},
-          h('input', {value:nf.title, placeholder:'Title', oninput: e => setNf('title', e.target.value)}),
-          h('input', {value:nf.author, placeholder:'Author', oninput: e => setNf('author', e.target.value)}),
-          h('input', {value:nf.pages, placeholder:'Pages', inputmode:'numeric', oninput: e => setNf('pages', e.target.value.replace(/[^0-9]/g,''))})
+          h('input', {value:nf.title, placeholder:'Title', oninput: e => setNfSilent('title', e.target.value)}),
+          h('input', {value:nf.author, placeholder:'Author', oninput: e => setNfSilent('author', e.target.value)}),
+          h('input', {value:nf.pages, placeholder:'Pages', inputmode:'numeric', oninput: e => {
+            const digits = e.target.value.replace(/[^0-9]/g,'');
+            if(e.target.value !== digits) e.target.value = digits;
+            setNfSilent('pages', digits);
+          }})
         )
       ),
       h('div', {class:'add-actions'},

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:/Users/CHARLI~1/AppData/Local/Temp/claude/c--Users-Charlie-Admin-Documents-Projects-NancyReader/198b7715-0fea-4774-ba19-13d5e4614d0c/scratchpad/drive-focus.js\" \"/c/Users/Charlie Admin/Documents/Projects/NancyReader/node_modules_tmp/drive-focus.js\")",
+      "Bash(node drive-focus.js)"
+    ]
+  }
+}
