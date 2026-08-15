@@ -512,5 +512,13 @@ if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline support is best-effort */ });
   });
+  // once a new service worker takes control, this tab is still running the
+  // old app.js from memory — reload so an updated build never gets stuck
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(reloading) return;
+    reloading = true;
+    location.reload();
+  });
 }
 })();

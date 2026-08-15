@@ -1,4 +1,4 @@
-const CACHE = 'reading-tracker-v1';
+const CACHE = 'reading-tracker-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -20,18 +20,19 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Network-first for app code so a fresh deploy is picked up on next load;
+// falls back to cache when offline. Cache is still primed on install for
+// the offline case, and kept fresh here on every successful fetch.
 self.addEventListener('fetch', event => {
   if(event.request.method !== 'GET') return;
+  if(!event.request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if(cached) return cached;
-      return fetch(event.request).then(res => {
-        if(res.ok && event.request.url.startsWith(self.location.origin)){
-          const clone = res.clone();
-          caches.open(CACHE).then(cache => cache.put(event.request, clone));
-        }
-        return res;
-      }).catch(() => cached);
-    })
+    fetch(event.request).then(res => {
+      if(res.ok){
+        const clone = res.clone();
+        caches.open(CACHE).then(cache => cache.put(event.request, clone));
+      }
+      return res;
+    }).catch(() => caches.match(event.request))
   );
 });
